@@ -81,7 +81,7 @@
       };
     }).
 
-    directive('ryeShowInProcess', function(QUtil) {
+    directive('ryeShowInProcess', function() {
 
       return {
         restrict: 'A',
@@ -102,7 +102,7 @@
       };
     }).
 
-    directive('ryeHideInProcess', function(QUtil) {
+    directive('ryeHideInProcess', function() {
 
       return {
         restrict: 'A',
@@ -121,7 +121,7 @@
       };
     }).
 
-    directive('ryeDisableInProcess', function(QUtil) {
+    directive('ryeDisableInProcess', function() {
 
       return {
         restrict: 'A',
