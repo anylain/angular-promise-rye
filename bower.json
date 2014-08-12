@@ -1,10 +1,10 @@
 {
   "name": "angular-rye",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "authors": [
     "panying <anylain@gmail.com>"
   ],
-  "description": "angularjs promise tracker with directive, can show/hide/disable element by promise process status",
+  "description": "A angularjs promise tracker with directive, can show/hide/disable element by promise process status",
   "main": "src/angular-rye.js",
   "dependencies": {
     "angular": ">=1.2.x"
@@ -15,7 +15,7 @@
     "rye"
   ],
   "license": "MIT",
-  "homepage": "http://10.10.206.148/otdc/angular-rye.git",
+  "homepage": "https://github.com/anylain/angular-promise-rye",
   "ignore": [
     "**/.*",
     "node_modules",
