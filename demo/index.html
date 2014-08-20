@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html ng-app="ryeDemo">
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Angularjs Promise Rye Demo</title>
+    <script src="../bower_components/angular/angular.js"></script>
+    <script src="../src/angular-rye.js"></script>
+    <script language="JavaScript">
+        var ryeDemo = angular.module('ryeDemo', [ 'ngPromiseRye' ]);
+
+        ryeDemo.controller('PromiseCtrl', function($scope, $q, $log) {
+            $scope.wait = 1;
+            $scope.willSuccess = function() {
+                var deferred = $q.defer();
+                var data = {$promise: deferred.promise};
+                setTimeout(function() {
+                    data.msg = "success message";
+                    deferred.resolve();
+                }, $scope.wait * 1000);
+                $scope.data = data;
+            };
+            $scope.willFault = function() {
+                var deferred = $q.defer();
+                var data = {$promise: deferred.promise};
+                setTimeout(function() {
+                    data.msg = "fault message";
+                    deferred.reject();
+                }, $scope.wait * 1000);
+                $scope.data = data;
+            };
+            $scope.reset = function(){
+                $scope.data = null;
+            };
+        });
+    </script>
+</head>
+<body>
+<div ng-controller="PromiseCtrl">
+
+    <input type="button" value="Call A Success Promise" ng-click="willSuccess()">
+    <input type="button" value="Call A Fault Promise" ng-click="willFault()">
+    <input type="button" value="Reset" ng-click="reset()">
+    <label>Wait <input type="number" min="0" max="10" step="1" ng-model="wait"> secound</label>
+
+    <ul>
+        <li>Show in process:
+            <span rye-show-in-process="data">Processing ...</span>
+        </li>
+        <li>Hide in process:
+            <span rye-hide-in-process="data">Click a button to call a promise.</span>
+        </li>
+        <li>Show on success:
+            <span rye-show-on-success="data">Success message is "{{data.msg}}"</span>
+        </li>
+        <li>Hide on success:
+            <span rye-hide-on-success="data">When success i will hide</span>
+        </li>
+        <li>Show on fault:
+            <span rye-show-on-fault="data">Fault message is "{{data.msg}}"</span>
+        </li>
+        <li>Hide on fault:
+            <span rye-hide-on-fault="data">When fault i will hide</span>
+        </li>
+        <li>Disable in process:
+            <input type="text" rye-disable-in-process="data">
+            <button rye-disable-in-process="data">button</button>
+        </li>
+    </ul>
+
+</div>
+</body>
+</html>
