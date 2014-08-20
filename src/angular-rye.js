@@ -1,5 +1,5 @@
 /**
- * Angular promise rye v0.2.0 https://github.com/anylain/angular-promise-rye
+ * Angular promise rye v0.3.0 https://github.com/anylain/angular-promise-rye
  * -----------------------------------------------------------------------------
  * Copyright 2014 PanYing <anylain@gmail.com> Released under the MIT License
  */
@@ -74,6 +74,63 @@
             getThen(promise)(null, function(reason) {
               scope.faultReason = reason;
               show(element);
+            });
+          }, true);
+
+        }
+      };
+    }).
+
+    directive('ryeShowOnSuccess', function() {
+
+      return {
+        restrict: 'A',
+        link: function(scope, element, attrs) {
+
+          scope.$watchCollection(attrs.ryeShowOnSuccess, function(promise) {
+
+            hide(element);
+
+            getThen(promise)(function() {
+              show(element);
+            });
+          }, true);
+
+        }
+      };
+    }).
+
+    directive('ryeHideOnFault', function() {
+
+      return {
+        restrict: 'A',
+        link: function(scope, element, attrs) {
+
+          scope.$watchCollection(attrs.ryeHideOnFault, function(promise) {
+
+            show(element);
+
+            getThen(promise)(null, function() {
+              hide(element);
+            });
+          }, true);
+
+        }
+      };
+    }).
+
+    directive('ryeHideOnSuccess', function() {
+
+      return {
+        restrict: 'A',
+        link: function(scope, element, attrs) {
+
+          scope.$watchCollection(attrs.ryeHideOnSuccess, function(promise) {
+
+            show(element);
+
+            getThen(promise)(function() {
+              hide(element);
             });
           }, true);
 
