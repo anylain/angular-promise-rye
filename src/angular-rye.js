@@ -1,5 +1,5 @@
 /**
- * Angular promise rye v0.3.0 https://github.com/anylain/angular-promise-rye
+ * Angular promise rye v0.3.1 https://github.com/anylain/angular-promise-rye
  * -----------------------------------------------------------------------------
  * Copyright 2014 PanYing <anylain@gmail.com> Released under the MIT License
  */
@@ -7,24 +7,25 @@
 (function(window, angular, undefined) {
   'use strict';
 
-  var tryGetFun = function(fun, promise) {
-    if (!promise) {
-      return;
-    }
-    if (promise.denodeify) {
-      return $q.when(promise)[fun];
-    }
-    return promise[fun] || promise['$' + fun] ||
-      (promise.$promise && promise.$promise[fun]);
-  };
 
-  var getThen = function(promise) {
-    return tryGetFun('then', promise) || angular.noop;
+  var callThen = function(promiseObj, onFulfilled, onRejected) {
+    var promise;
+    if (promiseObj.then || promiseObj.$then) {
+      promise = promiseObj;
+    } else if (promiseObj.$promise) {
+      promise = promiseObj.$promise;
+    } else if (promiseObj.denodeify) {
+      promise = $q.when(promiseObj);
+    } else {
+      throw new Exception("Can't found promise");
+    }
+
+    (promise.then || promise.$then).call(promise, onFulfilled, onRejected);
   };
 
 
   var onFinally = function(promise, callback) {
-    (tryGetFun('then', promise) || angular.noop)(callback, callback);
+    callThen(promise, callback, callback);
   };
 
   var handler = function(callback) {
@@ -71,7 +72,7 @@
 
             hide(element);
 
-            getThen(promise)(null, function(reason) {
+            callThen(promise, null, function(reason) {
               scope.faultReason = reason;
               show(element);
             });
@@ -91,7 +92,7 @@
 
             hide(element);
 
-            getThen(promise)(function() {
+            callThen(promise, function() {
               show(element);
             });
           }, true);
@@ -110,7 +111,7 @@
 
             show(element);
 
-            getThen(promise)(null, function() {
+            callThen(promise, null, function() {
               hide(element);
             });
           }, true);
@@ -129,7 +130,7 @@
 
             show(element);
 
-            getThen(promise)(function() {
+            callThen(promise, function() {
               hide(element);
             });
           }, true);
