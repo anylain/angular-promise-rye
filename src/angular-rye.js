@@ -1,5 +1,5 @@
 /**
- * Angular promise rye v0.3.1 https://github.com/anylain/angular-promise-rye
+ * Angular promise rye v0.4.0 https://github.com/anylain/angular-promise-rye
  * -----------------------------------------------------------------------------
  * Copyright 2014 PanYing <anylain@gmail.com> Released under the MIT License
  */
@@ -9,18 +9,20 @@
 
 
   var callThen = function(promiseObj, onFulfilled, onRejected) {
-    var promise;
-    if (promiseObj.then || promiseObj.$then) {
-      promise = promiseObj;
-    } else if (promiseObj.$promise) {
-      promise = promiseObj.$promise;
-    } else if (promiseObj.denodeify) {
-      promise = $q.when(promiseObj);
-    } else {
-      throw new Exception("Can't found promise");
-    }
+    if (promiseObj && !angular.isString(promiseObj)) {
+      var promise;
+      if (promiseObj.then || promiseObj.$then) {
+        promise = promiseObj;
+      } else if (promiseObj.$promise) {
+        promise = promiseObj.$promise;
+      } else if (promiseObj.denodeify) {
+        promise = $q.when(promiseObj);
+      } else {
+        throw new Exception("Can't found promise");
+      }
 
-    (promise.then || promise.$then).call(promise, onFulfilled, onRejected);
+      (promise.then || promise.$then).call(promise, onFulfilled, onRejected);
+    }
   };
 
 
@@ -197,6 +199,46 @@
 
         }
       };
-    });
+    }).
 
-})(window, window.angular);
+    directive('ryeClass', function() {
+      return {
+        restrict: 'A',
+        link: function(scope, element, attrs) {
+
+          var config = /^(\{.*\})\[(.+)\]$/.exec(attrs.ryeClass);
+
+          var classes = scope.$eval(config[1]);
+          var promiseObj = config[2];
+
+          scope.$watchCollection(promiseObj, function(promise) {
+
+              if (promise && !angular.isString(promise)) {
+
+                element.addClass(classes['process']);
+                element.removeClass([classes.success, classes.fault, classes.finally].join(" "));
+
+                callThen(promise, function() {
+                  element.addClass(classes.success);
+                }, function() {
+                  element.addClass(classes.fault);
+                });
+
+                onFinally(promise, function() {
+                  element.removeClass(classes.process);
+                  element.addClass(classes.finally);
+                });
+              } else {
+                element.removeClass([classes.process, classes.success, classes.fault, classes.finally].join(" "));
+              }
+            }, true
+          )
+          ;
+
+        }
+      };
+    })
+  ;
+
+})
+(window, window.angular);

@@ -28,11 +28,28 @@
                 }, $scope.wait * 1000);
                 $scope.data = data;
             };
-            $scope.reset = function(){
+            $scope.reset = function() {
                 $scope.data = null;
             };
         });
     </script>
+    <style>
+        .process {
+            background: #BDDCFF;
+        }
+
+        .success {
+            background: #CFFFBD;
+        }
+
+        .fault {
+            background: #FFBDBD;
+        }
+
+        .finally {
+            background: #C6BDFF;
+        }
+    </style>
 </head>
 <body>
 <div ng-controller="PromiseCtrl">
@@ -64,6 +81,12 @@
         <li>Disable in process:
             <input type="text" rye-disable-in-process="data">
             <button rye-disable-in-process="data">button</button>
+        </li>
+        <li><span rye-class="{process:'process',success:'success',fault:'fault'}[data]">Switch class</span>:
+            <span rye-class="{process:'process'}[data]">.process</span>
+            <span rye-class="{success:'success'}[data]">.success</span>
+            <span rye-class="{fault:'fault'}[data]">.fault</span>
+            <span rye-class="{finally:'finally'}[data]">.finally</span>
         </li>
     </ul>
 
