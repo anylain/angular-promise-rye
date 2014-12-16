@@ -213,32 +213,29 @@
 
           scope.$watchCollection(promiseObj, function(promise) {
 
-              if (promise && !angular.isString(promise)) {
+            if (promise && !angular.isString(promise)) {
 
-                element.addClass(classes['process']);
-                element.removeClass([classes.success, classes.fault, classes.finally].join(" "));
+              element.addClass(classes['process']);
+              element.removeClass([classes.success, classes.fault, classes.finally].join(" "));
 
-                callThen(promise, function() {
-                  element.addClass(classes.success);
-                }, function() {
-                  element.addClass(classes.fault);
-                });
+              callThen(promise, function() {
+                element.addClass(classes.success);
+              }, function() {
+                element.addClass(classes.fault);
+              });
 
-                onFinally(promise, function() {
-                  element.removeClass(classes.process);
-                  element.addClass(classes.finally);
-                });
-              } else {
-                element.removeClass([classes.process, classes.success, classes.fault, classes.finally].join(" "));
-              }
-            }, true
-          )
-          ;
+              onFinally(promise, function() {
+                element.removeClass(classes.process);
+                element.addClass(classes.finally);
+              });
+            } else {
+              element.removeClass([classes.process, classes.success, classes.fault, classes.finally].join(" "));
+            }
+          }, true);
 
         }
       };
-    })
-  ;
+    });
 
 })
 (window, window.angular);
