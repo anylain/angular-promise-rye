@@ -1,5 +1,5 @@
 /**
- * Angular promise rye v0.4.0 https://github.com/anylain/angular-promise-rye
+ * Angular promise rye v0.4.1 https://github.com/anylain/angular-promise-rye
  * -----------------------------------------------------------------------------
  * Copyright 2014 PanYing <anylain@gmail.com> Released under the MIT License
  */
@@ -8,35 +8,38 @@
   'use strict';
 
 
-  var callThen = function(promiseObj, onFulfilled, onRejected) {
-    if (promiseObj && !angular.isString(promiseObj)) {
-      var promise;
-      if (promiseObj.then || promiseObj.$then) {
-        promise = promiseObj;
-      } else if (promiseObj.$promise) {
-        promise = promiseObj.$promise;
-      } else if (promiseObj.denodeify) {
-        promise = $q.when(promiseObj);
-      } else {
-        throw new Exception("Can't found promise");
-      }
-
+  function callThen(promise, onFulfilled, onRejected) {
+    if(promise){
       (promise.then || promise.$then).call(promise, onFulfilled, onRejected);
     }
-  };
+  }
 
 
-  var onFinally = function(promise, callback) {
+  function watchInterceptor(value) {
+    if(angular.isDefined(value) && value !== null){
+      if (value.then || value.$then) {
+        return value;
+      } else if (value.$promise) {
+        return value.$promise;
+      } else if (value.denodeify) {
+        return $q.when(value);
+      }
+    }
+  }
+
+
+  function onFinally(promise, callback) {
     callThen(promise, callback, callback);
-  };
+  }
+  
 
-  var handler = function(callback) {
+  function handler(callback) {
     return function(promise) {
       if (promise && !angular.isString(promise)) {
         callback(promise);
       }
     }
-  };
+  }
 
   function disableElement(element, isDisabled) {
     var ignore = element.attr('rye-ignore') || element.attr('ryeIgnore');
@@ -64,13 +67,13 @@
 
   angular.module('ngPromiseRye', []).
 
-    directive('ryeShowOnFault', function() {
+    directive('ryeShowOnFault', ['$parse', function($parse) {
 
       return {
         restrict: 'A',
         link: function(scope, element, attrs) {
 
-          scope.$watchCollection(attrs.ryeShowOnFault, function(promise) {
+          scope.$watchCollection($parse(attrs.ryeShowOnFault, watchInterceptor), function(promise) {
 
             hide(element);
 
@@ -78,70 +81,70 @@
               scope.faultReason = reason;
               show(element);
             });
-          }, true);
+          });
 
         }
       };
-    }).
+    }]).
 
-    directive('ryeShowOnSuccess', function() {
+    directive('ryeShowOnSuccess', ['$parse', function($parse) {
 
       return {
         restrict: 'A',
         link: function(scope, element, attrs) {
 
-          scope.$watchCollection(attrs.ryeShowOnSuccess, function(promise) {
+          scope.$watchCollection($parse(attrs.ryeShowOnSuccess, watchInterceptor), function(promise) {
 
             hide(element);
 
             callThen(promise, function() {
               show(element);
             });
-          }, true);
+          });
 
         }
       };
-    }).
+    }]).
 
-    directive('ryeHideOnFault', function() {
+    directive('ryeHideOnFault', ['$parse', function($parse) {
 
       return {
         restrict: 'A',
         link: function(scope, element, attrs) {
 
-          scope.$watchCollection(attrs.ryeHideOnFault, function(promise) {
+          scope.$watchCollection($parse(attrs.ryeHideOnFault, watchInterceptor), function(promise) {
 
             show(element);
 
             callThen(promise, null, function() {
               hide(element);
             });
-          }, true);
+          });
 
         }
       };
-    }).
+    }]).
 
-    directive('ryeHideOnSuccess', function() {
+    directive('ryeHideOnSuccess', ['$parse', function($parse) {
 
       return {
         restrict: 'A',
         link: function(scope, element, attrs) {
 
-          scope.$watchCollection(attrs.ryeHideOnSuccess, function(promise) {
+          scope.$watchCollection($parse(attrs.ryeHideOnSuccess, watchInterceptor), function(promise) {
 
             show(element);
 
             callThen(promise, function() {
               hide(element);
             });
-          }, true);
+          });
 
         }
       };
-    }).
+    }]).
 
-    directive('ryeShowInProcess', function() {
+    directive('ryeShowInProcess', ['$parse', function($parse) {
 
       return {
         restrict: 'A',
@@ -149,45 +152,45 @@
 
           hide(element);
 
-          scope.$watchCollection(attrs.ryeShowInProcess, handler(function(promise) {
+          scope.$watchCollection($parse(attrs.ryeShowInProcess, watchInterceptor), handler(function(promise) {
 
             show(element);
 
             onFinally(promise, function() {
               hide(element);
             });
-          }), true);
+          }));
 
         }
       };
-    }).
+    }]).
 
-    directive('ryeHideInProcess', function() {
+    directive('ryeHideInProcess', ['$parse', function($parse) {
 
       return {
         restrict: 'A',
         link: function(scope, element, attrs) {
 
-          scope.$watchCollection(attrs.ryeHideInProcess, handler(function(promise) {
+          scope.$watchCollection($parse(attrs.ryeHideInProcess, watchInterceptor), handler(function(promise) {
 
             hide(element);
 
             onFinally(promise, function() {
               show(element);
             });
-          }), true);
+          }));
 
         }
       };
-    }).
+    }]).
 
-    directive('ryeDisableInProcess', function() {
+    directive('ryeDisableInProcess', ['$parse', function($parse) {
 
       return {
         restrict: 'A',
         link: function(scope, element, attrs) {
 
-          scope.$watchCollection(attrs.ryeDisableInProcess, handler(function(promise) {
+          scope.$watchCollection($parse(attrs.ryeDisableInProcess, watchInterceptor), handler(function(promise) {
 
             disableElement(element, true);
 
@@ -195,13 +198,12 @@
               disableElement(element, false);
             });
 
-          }), true);
-
+          }));
         }
       };
-    }).
+    }]).
 
-    directive('ryeClass', function() {
+    directive('ryeClass', ['$parse', function($parse) {
       return {
         restrict: 'A',
         link: function(scope, element, attrs) {
@@ -211,7 +213,7 @@
           var classes = scope.$eval(config[1]);
           var promiseObj = config[2];
 
-          scope.$watchCollection(promiseObj, function(promise) {
+          scope.$watchCollection($parse(promiseObj, watchInterceptor), function(promise) {
 
             if (promise && !angular.isString(promise)) {
 
@@ -231,11 +233,11 @@
             } else {
               element.removeClass([classes.process, classes.success, classes.fault, classes.finally].join(" "));
             }
-          }, true);
+          });
 
         }
       };
-    });
+    }]);
 
 })
 (window, window.angular);
