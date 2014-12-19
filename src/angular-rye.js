@@ -9,14 +9,14 @@
 
 
   function callThen(promise, onFulfilled, onRejected) {
-    if(promise){
+    if (promise) {
       (promise.then || promise.$then).call(promise, onFulfilled, onRejected);
     }
   }
 
 
   function watchInterceptor(value) {
-    if(angular.isDefined(value) && value !== null){
+    if (angular.isDefined(value) && value !== null) {
       if (value.then || value.$then) {
         return value;
       } else if (value.$promise) {
@@ -31,15 +31,7 @@
   function onFinally(promise, callback) {
     callThen(promise, callback, callback);
   }
-  
 
-  function handler(callback) {
-    return function(promise) {
-      if (promise && !angular.isString(promise)) {
-        callback(promise);
-      }
-    }
-  }
 
   function disableElement(element, isDisabled) {
     var ignore = element.attr('rye-ignore') || element.attr('ryeIgnore');
@@ -75,11 +67,15 @@
 
           scope.$watchCollection($parse(attrs.ryeShowOnFault, watchInterceptor), function(promise) {
 
+            scope.currPromise = promise;
+
             hide(element);
 
             callThen(promise, null, function(reason) {
-              scope.faultReason = reason;
-              show(element);
+              if (scope.currPromise === promise) {
+                scope.faultReason = reason;
+                show(element);
+              }
             });
           });
 
@@ -95,10 +91,14 @@
 
           scope.$watchCollection($parse(attrs.ryeShowOnSuccess, watchInterceptor), function(promise) {
 
+            scope.currPromise = promise;
+
             hide(element);
 
             callThen(promise, function() {
-              show(element);
+              if (scope.currPromise === promise) {
+                show(element);
+              }
             });
           });
 
@@ -114,10 +114,14 @@
 
           scope.$watchCollection($parse(attrs.ryeHideOnFault, watchInterceptor), function(promise) {
 
+            scope.currPromise = promise;
+
             show(element);
 
             callThen(promise, null, function() {
-              hide(element);
+              if (scope.currPromise === promise) {
+                hide(element);
+              }
             });
           });
 
@@ -133,10 +137,14 @@
 
           scope.$watchCollection($parse(attrs.ryeHideOnSuccess, watchInterceptor), function(promise) {
 
+            scope.currPromise = promise;
+
             show(element);
 
             callThen(promise, function() {
-              hide(element);
+              if (scope.currPromise === promise) {
+                hide(element);
+              }
             });
           });
 
@@ -152,14 +160,23 @@
 
           hide(element);
 
-          scope.$watchCollection($parse(attrs.ryeShowInProcess, watchInterceptor), handler(function(promise) {
+          scope.$watchCollection($parse(attrs.ryeShowInProcess, watchInterceptor), function(promise) {
 
-            show(element);
+            scope.currPromise = promise;
 
-            onFinally(promise, function() {
+            if (promise && !angular.isString(promise)) {
+
+              show(element);
+
+              onFinally(promise, function() {
+                if (scope.currPromise === promise) {
+                  hide(element);
+                }
+              });
+            } else {
               hide(element);
-            });
-          }));
+            }
+          });
 
         }
       };
@@ -171,14 +188,23 @@
         restrict: 'A',
         link: function(scope, element, attrs) {
 
-          scope.$watchCollection($parse(attrs.ryeHideInProcess, watchInterceptor), handler(function(promise) {
+          scope.$watchCollection($parse(attrs.ryeHideInProcess, watchInterceptor), function(promise) {
 
-            hide(element);
+            scope.currPromise = promise;
 
-            onFinally(promise, function() {
+            if (promise && !angular.isString(promise)) {
+
+              hide(element);
+
+              onFinally(promise, function() {
+                if (scope.currPromise === promise) {
+                  show(element);
+                }
+              });
+            } else {
               show(element);
-            });
-          }));
+            }
+          });
 
         }
       };
@@ -190,15 +216,24 @@
         restrict: 'A',
         link: function(scope, element, attrs) {
 
-          scope.$watchCollection($parse(attrs.ryeDisableInProcess, watchInterceptor), handler(function(promise) {
+          scope.$watchCollection($parse(attrs.ryeDisableInProcess, watchInterceptor), function(promise) {
 
-            disableElement(element, true);
+            scope.currPromise = promise;
 
-            onFinally(promise, function() {
+            if (promise && !angular.isString(promise)) {
+
+              disableElement(element, true);
+
+              onFinally(promise, function() {
+                if (scope.currPromise === promise) {
+                  disableElement(element, false);
+                }
+              });
+            } else {
               disableElement(element, false);
-            });
+            }
 
-          }));
+          });
         }
       };
     }]).
@@ -215,20 +250,28 @@
 
           scope.$watchCollection($parse(promiseObj, watchInterceptor), function(promise) {
 
+            scope.currPromise = promise;
+
             if (promise && !angular.isString(promise)) {
 
               element.addClass(classes['process']);
               element.removeClass([classes.success, classes.fault, classes.finally].join(" "));
 
               callThen(promise, function() {
-                element.addClass(classes.success);
+                if (scope.currPromise === promise) {
+                  element.addClass(classes.success);
+                }
               }, function() {
-                element.addClass(classes.fault);
+                if (scope.currPromise === promise) {
+                  element.addClass(classes.fault);
+                }
               });
 
               onFinally(promise, function() {
-                element.removeClass(classes.process);
-                element.addClass(classes.finally);
+                if (scope.currPromise === promise) {
+                  element.removeClass(classes.process);
+                  element.addClass(classes.finally);
+                }
               });
             } else {
               element.removeClass([classes.process, classes.success, classes.fault, classes.finally].join(" "));
