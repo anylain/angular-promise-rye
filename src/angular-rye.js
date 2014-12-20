@@ -1,5 +1,5 @@
 /**
- * Angular promise rye v0.4.1 https://github.com/anylain/angular-promise-rye
+ * Angular promise rye v0.4.2 https://github.com/anylain/angular-promise-rye
  * -----------------------------------------------------------------------------
  * Copyright 2014 PanYing <anylain@gmail.com> Released under the MIT License
  */
