@@ -1,7 +1,7 @@
 {
   "name": "angular-rye",
   "private": true,
-  "version": "0.4.3",
+  "version": "0.4.4",
   "description": "A angularjs promise tracker with directive, can show/hide/disable element and switch element class by promise process status",
   "license": "MIT",
   "dependencies": {
